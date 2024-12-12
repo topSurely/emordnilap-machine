@@ -4,28 +4,18 @@ import { useEffect, useState } from 'react';
 import { Vector2 } from '@catsums/vector2';
 
 export default function MachineStage({ text, width, height }: { text: string, width: number, height: number }) {
-    const [cursorType, setCursorType] = useState<CursorType>(CursorType.Free)
-    const [cursor, setCursor] = useState<string>("inherit")
 
-    useEffect(() => {
-        console.log("hoverin")
-        switch (cursorType) {
-            case CursorType.Free:
-                setCursor("inherit")
-                break;
-            case CursorType.Hold:
-                setCursor("grabbing")
-                break;
-            case CursorType.Hover:
-                setCursor("grab")
-                break;
-        }
-    }, [cursorType])
+    const [mousePosition, setMousePosition] = useState<Vector2>(new Vector2())
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        const rect = e.currentTarget.getBoundingClientRect()
+        setMousePosition(new Vector2(e.clientX - rect.left, e.clientY - rect.top))
+    }
 
     return (
         <>
-            <Stage options={{ background: "black", antialias: true }} width={width} height={height} style={{ cursor: cursor }}>
-                <Emordnilap text={text} height={height} width={width} setCursorState={setCursorType} />
+            <Stage options={{ background: "black", antialias: true }} width={width} height={height} onMouseMove={handleMouseMove}>
+                <Emordnilap text={text} height={height} width={width} mousePosition={mousePosition} />
             </Stage>
         </>
     )
@@ -35,15 +25,41 @@ enum CursorType {
     Hover,
     Hold
 }
-function Emordnilap({ text, width, height, setCursorState }: { text: string, width: number, height: number, setCursorState: (newState: CursorType) => void }) {
+function Emordnilap({ text, width, height, mousePosition }: { text: string, width: number, height: number, mousePosition: Vector2 }) {
     const [fontLoaded, setFontLoaded] = useState<boolean>(false);
     const [rotation, setRotation] = useState<number>(0);
     const [rectWidth, setRectWidth] = useState<number>(30);
+    const [hovering, setHovering] = useState<boolean>(false);
+    const [grabbing, setGrabbing] = useState<boolean>(false);
+    const [grabPosition, setGrabPosition] = useState<Vector2>(new Vector2())
+    const [cursorState, setCursorState] = useState<CursorType>(CursorType.Free);
+    useEffect(() => {
+        if (grabbing) setCursorState(CursorType.Hold)
+        else if (hovering) setCursorState(CursorType.Hover)
+        else setCursorState(CursorType.Free)
+
+
+    }, [hovering, grabbing])
+    useEffect(() => {
+        switch (cursorState) {
+            case CursorType.Hold:
+                document.body.style.cursor = "grabbing"
+                break;
+            case CursorType.Hover:
+                document.body.style.cursor = "grab"
+                break
+            default:
+                document.body.style.cursor = ""
+        }
+    }, [cursorState])
     useEffect(() => {
         Assets.load('/font/chewy.xml').then(() => {
             setFontLoaded(true)
             console.log("Loaded font!")
         })
+        document.body.onmouseup = () => {
+            setGrabbing(false);
+        }
     }, [])
     useEffect(() => {
         setRectWidth(30 + text.length * 35)
@@ -72,11 +88,32 @@ function Emordnilap({ text, width, height, setCursorState }: { text: string, wid
         g.endFill();
     }
     useTick((delta) => {
-        // setRotation(rotation + delta / 36)
+        if (!grabbing)
+            return;
+        const offset = new Vector2(width / 2, height / 2)
+        offset.subtract(mousePosition)
+        const point = offset.normalized()
+        const angled = Vector2.RIGHT
+        angled.rotateAround(Vector2.ZERO, rotation)
+        const angleDiff = angled.angleTo(point)
+        setRotation(rotation - angleDiff)
+
+
     })
     return (
         <>
-            <Graphics draw={drawRect} pivot={[rectWidth / 2, 35 / 2]} x={width / 2} eventMode={'dynamic'} rotation={rotation} y={height / 2} onmouseenter={() => setCursorState(CursorType.Hover)} onmouseleave={() => setCursorState(CursorType.Free)} />
+            <Graphics
+                draw={drawRect}
+                pivot={[rectWidth / 2, 35 / 2]}
+                eventMode={'dynamic'} rotation={rotation}
+                x={width / 2}
+                y={height / 2}
+                onmouseenter={() => setHovering(true)}
+                onmouseleave={() => setHovering(false)}
+                onmousedown={(e) => {
+                    setGrabPosition(new Vector2(e.x, e.y))
+                    setGrabbing(true)
+                }} />
             {
                 fontLoaded &&
                 renderLetters()
