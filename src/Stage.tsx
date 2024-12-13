@@ -28,11 +28,12 @@ enum CursorType {
 function Emordnilap({ text, width, height, mousePosition }: { text: string, width: number, height: number, mousePosition: Vector2 }) {
     const [fontLoaded, setFontLoaded] = useState<boolean>(false);
     const [rotation, setRotation] = useState<number>(0);
+    const [rotationalVelocity, setRotationalVelocity] = useState<number>(0)
     const [rectWidth, setRectWidth] = useState<number>(30);
     const [hovering, setHovering] = useState<boolean>(false);
     const [grabbing, setGrabbing] = useState<boolean>(false);
-    const [grabPosition, setGrabPosition] = useState<Vector2>(new Vector2())
     const [cursorState, setCursorState] = useState<CursorType>(CursorType.Free);
+    const [leftSide, setLeftSide] = useState<boolean>(false);
     useEffect(() => {
         if (grabbing) setCursorState(CursorType.Hold)
         else if (hovering) setCursorState(CursorType.Hover)
@@ -87,18 +88,33 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
         g.drawRoundedRect(0, 0, rectWidth, 35, 15);
         g.endFill();
     }
-    useTick((delta) => {
-        if (!grabbing)
-            return;
+    const getLeftSide = (): boolean => {
         const offset = new Vector2(width / 2, height / 2)
         offset.subtract(mousePosition)
         const point = offset.normalized()
         const angled = Vector2.RIGHT
         angled.rotateAround(Vector2.ZERO, rotation)
         const angleDiff = angled.angleTo(point)
-        setRotation(rotation - angleDiff)
-
-
+        console.log("Angle diff:", angleDiff)
+        return Math.abs(angleDiff) > 3;
+    }
+    useTick((delta) => {
+        let rot = rotation;
+        if (grabbing) {
+            const offset = new Vector2(width / 2, height / 2)
+            offset.subtract(mousePosition)
+            const point = offset.normalized()
+            const angled = leftSide ? Vector2.LEFT : Vector2.RIGHT
+            angled.rotateAround(Vector2.ZERO, rot)
+            const angleDiff = angled.angleTo(point)
+            rot -= angleDiff
+            setRotationalVelocity(-angleDiff)
+        }
+        else {
+            rot += rotationalVelocity * delta
+            rot = (Math.abs(rot) % (Math.PI * 2)) * Math.sign(rot)
+        }
+        setRotation(rot)
     })
     return (
         <>
@@ -111,7 +127,7 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
                 onmouseenter={() => setHovering(true)}
                 onmouseleave={() => setHovering(false)}
                 onmousedown={(e) => {
-                    setGrabPosition(new Vector2(e.x, e.y))
+                    setLeftSide(getLeftSide())
                     setGrabbing(true)
                 }} />
             {
