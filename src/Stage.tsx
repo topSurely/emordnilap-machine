@@ -98,6 +98,22 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
         console.log("Angle diff:", angleDiff)
         return Math.abs(angleDiff) > 3;
     }
+    const angle = (rad1: number, rad2: number): number => {
+        let angle = Math.abs(rad1 - rad2) % (2 * Math.PI);
+        return angle > Math.PI ? 2 * Math.PI - angle : angle;
+    }
+    function signedAngle(rad1: number, rad2: number): number {
+        let angle = (rad2 - rad1) % (2 * Math.PI);
+        if (angle > Math.PI) angle -= 2 * Math.PI;
+        if (angle < -Math.PI) angle += 2 * Math.PI;
+        return angle;
+    }
+    function AngleTo(rot: number): number {
+        const closestRot = (angle(rot, Math.PI * 2) > Math.PI / 2 ? Math.PI : 0)
+        const angleTo = signedAngle(rot, closestRot)
+        console.log(closestRot, angle(rot, Math.PI * 2) % Math.PI / 2, rot)
+        return angleTo
+    }
     useTick((delta) => {
         let rot = rotation;
         if (grabbing) {
@@ -108,11 +124,19 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
             angled.rotateAround(Vector2.ZERO, rot)
             const angleDiff = angled.angleTo(point)
             rot -= angleDiff
+            rot = (Math.abs(rot) % (Math.PI * 2)) * Math.sign(rot)
+            const angleTo = AngleTo(rot)
+
+
             setRotationalVelocity(-angleDiff)
         }
         else {
             rot += rotationalVelocity * delta
             rot = (Math.abs(rot) % (Math.PI * 2)) * Math.sign(rot)
+            const angleTo = AngleTo(rot)
+
+            setRotationalVelocity((rotationalVelocity + ((angleTo * Math.exp(-delta)) / 4)) * Math.exp(-delta / 10))
+            if (Math.abs(angleTo) < 0.01 && Math.abs(rotationalVelocity) < 0.001) setRotationalVelocity(0)
         }
         setRotation(rot)
     })
