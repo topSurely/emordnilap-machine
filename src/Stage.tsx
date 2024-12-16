@@ -1,4 +1,4 @@
-import { Assets, Color, Graphics as DrawGraphics, Filter } from 'pixi.js';
+import { Assets, Color, Graphics as DrawGraphics } from 'pixi.js';
 import { Stage, Container, BitmapText, Graphics, useTick } from '@pixi/react';
 import { useEffect, useState } from 'react';
 import { Vector2 } from '@catsums/vector2';
