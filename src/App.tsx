@@ -3,7 +3,7 @@ import MachineStage from "./Stage"
 
 function App() {
 
-  const [textValue, setTextValue] = useState<string>("");
+  const [textValue, setTextValue] = useState<string>("PALINDROME");
 
   return (
     <>
