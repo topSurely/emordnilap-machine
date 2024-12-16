@@ -17,11 +17,9 @@ export default function MachineStage({ text, width, height }: { text: string, wi
     }
 
     return (
-        <>
-            <Stage options={{ background: "black", antialias: true }} width={width} height={height} onMouseMove={handleMouseMove} onTouchMove={handleTouchMove}>
-                <Emordnilap text={text} height={height} width={width} mousePosition={mousePosition} />
-            </Stage>
-        </>
+        <Stage options={{ background: "black", antialias: true }} width={width} height={height} onMouseMove={handleMouseMove} onTouchMove={handleTouchMove}>
+            <Emordnilap text={text} height={height} width={width} mousePosition={mousePosition} />
+        </Stage>
     )
 }
 enum CursorType {
