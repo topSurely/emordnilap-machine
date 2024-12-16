@@ -7,14 +7,20 @@ export default function MachineStage({ text, width, height }: { text: string, wi
 
     const [mousePosition, setMousePosition] = useState<Vector2>(new Vector2())
 
+    const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+        console.log(e.touches)
+        const rect = e.currentTarget.getBoundingClientRect()
+        setMousePosition(new Vector2(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top))
+    }
     const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        console.log(e.clientX)
         const rect = e.currentTarget.getBoundingClientRect()
         setMousePosition(new Vector2(e.clientX - rect.left, e.clientY - rect.top))
     }
 
     return (
         <>
-            <Stage options={{ background: "black", antialias: true }} width={width} height={height} onMouseMove={handleMouseMove}>
+            <Stage options={{ background: "black", antialias: true }} width={width} height={height} onMouseMove={handleMouseMove} onTouchMove={handleTouchMove}>
                 <Emordnilap text={text} height={height} width={width} mousePosition={mousePosition} />
             </Stage>
         </>
@@ -60,6 +66,9 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
         })
         document.body.onmouseup = () => {
             setGrabbing(false);
+        }
+        document.body.ontouchend = () => {
+            setGrabbing(false)
         }
     }, [])
     useEffect(() => {
@@ -153,7 +162,12 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
                 onmousedown={() => {
                     setLeftSide(getLeftSide())
                     setGrabbing(true)
-                }} />
+                }}
+                ontouchstart={() => {
+                    setLeftSide(getLeftSide())
+                    setGrabbing(true)
+                }}
+            />
             {
                 fontLoaded &&
                 renderLetters()
