@@ -9,7 +9,7 @@ function App() {
     <>
       <MachineStage text={textValue} height={500} width={1000} />
       <input value={textValue} onChange={(e) => {
-        setTextValue(e.target.value.toUpperCase())
+        setTextValue(e.target.value.replace(/[^a-zA-Z]/g, "").toUpperCase())
       }} />
     </>
   )

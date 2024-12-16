@@ -1,4 +1,4 @@
-import { Assets, Graphics as DrawGraphics } from 'pixi.js';
+import { Assets, Color, Graphics as DrawGraphics, Filter } from 'pixi.js';
 import { Stage, Container, BitmapText, Graphics, useTick } from '@pixi/react';
 import { useEffect, useState } from 'react';
 import { Vector2 } from '@catsums/vector2';
@@ -8,12 +8,10 @@ export default function MachineStage({ text, width, height }: { text: string, wi
     const [mousePosition, setMousePosition] = useState<Vector2>(new Vector2())
 
     const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
-        console.log(e.touches)
         const rect = e.currentTarget.getBoundingClientRect()
         setMousePosition(new Vector2(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top))
     }
     const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-        console.log(e.clientX)
         const rect = e.currentTarget.getBoundingClientRect()
         setMousePosition(new Vector2(e.clientX - rect.left, e.clientY - rect.top))
     }
@@ -40,6 +38,7 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
     const [grabbing, setGrabbing] = useState<boolean>(false);
     const [cursorState, setCursorState] = useState<CursorType>(CursorType.Free);
     const [leftSide, setLeftSide] = useState<boolean>(false);
+    const [reset, setReset] = useState<boolean>(false);
     useEffect(() => {
         if (grabbing) setCursorState(CursorType.Hold)
         else if (hovering) setCursorState(CursorType.Hover)
@@ -60,6 +59,13 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
         }
     }, [cursorState])
     useEffect(() => {
+        setReset(true)
+    }, [text])
+    useEffect(() => {
+        if (grabbing)
+            setReset(false)
+    }, [grabbing])
+    useEffect(() => {
         Assets.load('./font/chewy.xml').then(() => {
             setFontLoaded(true)
             console.log("Loaded font!")
@@ -74,10 +80,11 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
     useEffect(() => {
         setRectWidth(30 + text.length * 35)
     }, [text])
+    let letterIndex = 0
     const renderLetters = () => {
         const middle = new Vector2(width / 2, height / 2);
-        const from = new Vector2((middle.x - (rectWidth / 2)) + 35 / 2, middle.y);
-        const to = new Vector2((middle.x + (rectWidth / 2)) + 35 / 2, middle.y);
+        const from = new Vector2((middle.x - (rectWidth / 2)) + (35 / 2), middle.y);
+        const to = new Vector2((middle.x + (rectWidth / 2)) + (35 / 2), middle.y);
         from.rotateAround(middle, rotation);
         to.rotateAround(middle, rotation);
 
@@ -86,8 +93,8 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
             const element = text[index];
             const t = index / text.length;
             const pos = from.lerp(to, t);
-
-            elements.push(<SingleLetter char={element} index={index} position={pos} />)
+            const color = new Color({ h: Math.random() * 100, s: 100, l: 70 });
+            elements.push(<SingleLetter char={element} index={index} position={pos} color={color} key={letterIndex++} />)
         }
         return elements
     }
@@ -104,8 +111,8 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
         const angled = Vector2.RIGHT
         angled.rotateAround(Vector2.ZERO, rotation)
         const angleDiff = angled.angleTo(point)
-        // console.log("Angle diff:", angleDiff)
-        return angle(angleDiff, 0) > 3;
+        console.log("Angle diff:", angle(angleDiff, 0))
+        return angle(angleDiff, 0) > Math.PI / 2;
     }
     const angle = (rad1: number, rad2: number): number => {
         let angle = Math.abs(rad1 - rad2) % (2 * Math.PI);
@@ -118,13 +125,14 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
         return angle;
     }
     function AngleTo(rot: number): number {
-        const closestRot = (angle(rot, Math.PI * 2) > Math.PI / 2 ? Math.PI : 0)
+        const closestRot = reset ? 0 : (angle(rot, Math.PI * 2) > Math.PI / 2 ? Math.PI : 0)
         const angleTo = signedAngle(rot, closestRot)
         // console.log(closestRot, angle(rot, Math.PI * 2) % Math.PI / 2, rot)
         return angleTo
     }
     useTick((delta) => {
         let rot = rotation;
+        let vel = rotationalVelocity;
         if (grabbing) {
             const offset = new Vector2(width / 2, height / 2)
             offset.subtract(mousePosition)
@@ -137,16 +145,18 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
             // const angleTo = AngleTo(rot)
 
 
-            setRotationalVelocity(-angleDiff)
+            vel = -angleDiff
         }
         else {
             rot += rotationalVelocity * delta
             rot = (Math.abs(rot) % (Math.PI * 2)) * Math.sign(rot)
             const angleTo = AngleTo(rot)
 
-            setRotationalVelocity((rotationalVelocity + ((angleTo * Math.exp(-delta)) / 4)) * Math.exp(-delta / 10))
-            if (Math.abs(angleTo) < 0.01 && Math.abs(rotationalVelocity) < 0.001) setRotationalVelocity(0)
+            vel = (rotationalVelocity + ((angleTo * Math.exp(-delta)) / 4)) * Math.exp(-delta / 10)
+            vel = Math.min(Math.abs(vel), 1) * Math.sign(vel)
+            if (Math.abs(angleTo) < 0.01 && Math.abs(rotationalVelocity) < 0.001) vel = 0
         }
+        setRotationalVelocity(vel)
         setRotation(rot)
     })
     return (
@@ -175,19 +185,19 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
         </>
     )
 }
-function SingleLetter({ char, position }: { char: string, index: number, position: Vector2 }) {
+function SingleLetter({ char, position, color }: { char: string, index: number, position: Vector2, color: Color }) {
     return (
         <>
             <Container x={position.x} y={position.y}>
-                <Graphics draw={
+                {/* <Graphics draw={
                     (g) => {
                         g.clear();
                         g.beginFill("red")
                         g.drawCircle(0, 0, 5)
                         g.endFill();
                     }
-                } />
-                <BitmapText text={char} anchor={[0.5, 0.6]} fontSize={35} style={{ fontName: 'Chewy', align: 'center' }} />
+                } /> */}
+                <BitmapText text={char} anchor={[0.5, 0.6]} align='center' fontSize={35} style={{ fontName: 'Chewy', align: 'center', tint: color }} />
             </Container>
         </>
     )
