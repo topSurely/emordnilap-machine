@@ -54,7 +54,7 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
         }
     }, [cursorState])
     useEffect(() => {
-        Assets.load('/font/chewy.xml').then(() => {
+        Assets.load('./font/chewy.xml').then(() => {
             setFontLoaded(true)
             console.log("Loaded font!")
         })
