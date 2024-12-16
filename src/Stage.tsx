@@ -96,7 +96,7 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
         angled.rotateAround(Vector2.ZERO, rotation)
         const angleDiff = angled.angleTo(point)
         // console.log("Angle diff:", angleDiff)
-        return Math.abs(angleDiff) > 3;
+        return angle(angleDiff, 0) > 3;
     }
     const angle = (rad1: number, rad2: number): number => {
         let angle = Math.abs(rad1 - rad2) % (2 * Math.PI);
