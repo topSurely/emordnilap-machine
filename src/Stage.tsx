@@ -95,7 +95,7 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
         const angled = Vector2.RIGHT
         angled.rotateAround(Vector2.ZERO, rotation)
         const angleDiff = angled.angleTo(point)
-        console.log("Angle diff:", angleDiff)
+        // console.log("Angle diff:", angleDiff)
         return Math.abs(angleDiff) > 3;
     }
     const angle = (rad1: number, rad2: number): number => {
@@ -111,7 +111,7 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
     function AngleTo(rot: number): number {
         const closestRot = (angle(rot, Math.PI * 2) > Math.PI / 2 ? Math.PI : 0)
         const angleTo = signedAngle(rot, closestRot)
-        console.log(closestRot, angle(rot, Math.PI * 2) % Math.PI / 2, rot)
+        // console.log(closestRot, angle(rot, Math.PI * 2) % Math.PI / 2, rot)
         return angleTo
     }
     useTick((delta) => {
