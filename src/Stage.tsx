@@ -125,7 +125,7 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
             const angleDiff = angled.angleTo(point)
             rot -= angleDiff
             rot = (Math.abs(rot) % (Math.PI * 2)) * Math.sign(rot)
-            const angleTo = AngleTo(rot)
+            // const angleTo = AngleTo(rot)
 
 
             setRotationalVelocity(-angleDiff)
@@ -150,7 +150,7 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
                 y={height / 2}
                 onmouseenter={() => setHovering(true)}
                 onmouseleave={() => setHovering(false)}
-                onmousedown={(e) => {
+                onmousedown={() => {
                     setLeftSide(getLeftSide())
                     setGrabbing(true)
                 }} />
