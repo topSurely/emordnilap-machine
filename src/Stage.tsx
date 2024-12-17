@@ -101,12 +101,11 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
     const getLeftSide = (): boolean => {
         const offset = new Vector2(width / 2, height / 2)
         offset.subtract(mousePosition)
-        const point = offset.normalized()
-        const angled = Vector2.RIGHT
-        angled.rotateAround(Vector2.ZERO, rotation)
-        const angleDiff = angled.angleTo(point)
-        console.log("Angle diff:", angle(angleDiff, 0))
-        return angle(angleDiff, 0) > Math.PI / 2;
+        const left = offset.x < 0;
+        const flipped = Math.abs(rotation) > Math.PI / 2
+        const leftSide = flipped ? left : !left
+        console.log(leftSide)
+        return !leftSide
     }
     const angle = (rad1: number, rad2: number): number => {
         let angle = Math.abs(rad1 - rad2) % (2 * Math.PI);
