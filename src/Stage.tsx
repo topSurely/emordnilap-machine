@@ -6,18 +6,14 @@ import { Vector2 } from '@catsums/vector2';
 export default function MachineStage({ text, width, height }: { text: string, width: number, height: number }) {
 
     const [mousePosition, setMousePosition] = useState<Vector2>(new Vector2())
-
-    const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
-        const rect = e.currentTarget.getBoundingClientRect()
-        setMousePosition(new Vector2(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top))
-    }
     const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const rect = e.currentTarget.getBoundingClientRect()
         setMousePosition(new Vector2(e.clientX - rect.left, e.clientY - rect.top))
     }
 
     return (
-        <Stage options={{ background: "black", antialias: true }} width={width} height={height} onMouseMove={handleMouseMove} onTouchMove={handleTouchMove}>
+        <Stage
+            options={{ background: "black", antialias: true }} width={width} height={height} onPointerMove={handleMouseMove} >
             <Emordnilap text={text} height={height} width={width} mousePosition={mousePosition} />
         </Stage>
     )
@@ -68,11 +64,8 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
             setFontLoaded(true)
             console.log("Loaded font!")
         })
-        document.body.onmouseup = () => {
+        document.body.onpointerup = () => {
             setGrabbing(false);
-        }
-        document.body.ontouchend = () => {
-            setGrabbing(false)
         }
     }, [])
     useEffect(() => {
@@ -165,13 +158,9 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
                 eventMode={'dynamic'} rotation={rotation}
                 x={width / 2}
                 y={height / 2}
-                onmouseenter={() => setHovering(true)}
-                onmouseleave={() => setHovering(false)}
-                onmousedown={() => {
-                    setLeftSide(getLeftSide())
-                    setGrabbing(true)
-                }}
-                ontouchstart={() => {
+                onpointerenter={() => setHovering(true)}
+                onpointerleave={() => setHovering(false)}
+                onpointerdown={() => {
                     setLeftSide(getLeftSide())
                     setGrabbing(true)
                 }}
