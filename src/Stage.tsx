@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { Vector2 } from '@catsums/vector2';
 
 export default function MachineStage({ text, width, height }: { text: string, width: number, height: number }) {
-
     const [mousePosition, setMousePosition] = useState<Vector2>(new Vector2())
     const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const rect = e.currentTarget.getBoundingClientRect()
@@ -13,7 +12,11 @@ export default function MachineStage({ text, width, height }: { text: string, wi
 
     return (
         <Stage
-            options={{ background: "black", antialias: true }} width={width} height={height} onPointerMove={handleMouseMove} onPointerDown={handleMouseMove} >
+            options={{ background: "black", antialias: true }} width={width} height={height} onPointerMove={(e) => {
+                handleMouseMove(e)
+            }} onPointerDown={(e) => {
+                handleMouseMove(e)
+            }} >
             <Emordnilap text={text} height={height} width={width} mousePosition={mousePosition} />
         </Stage>
     )
@@ -95,9 +98,9 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
         g.drawRoundedRect(0, 0, rectWidth, 35, 15);
         g.endFill();
     }
-    const getLeftSide = (): boolean => {
+    const getLeftSide = (mousePos: Vector2): boolean => {
         const offset = new Vector2(width / 2, height / 2)
-        offset.subtract(mousePosition)
+        offset.subtract(mousePos)
         const point = offset.normalized()
         const angled = Vector2.RIGHT
         angled.rotateAround(Vector2.ZERO, rotation)
@@ -160,8 +163,8 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
                 y={height / 2}
                 onpointerenter={() => setHovering(true)}
                 onpointerleave={() => setHovering(false)}
-                onpointerdown={() => {
-                    setLeftSide(getLeftSide())
+                onpointerdown={(e) => {
+                    setLeftSide(getLeftSide(new Vector2(e.x, e.y)))
                     setGrabbing(true)
                 }}
             />
