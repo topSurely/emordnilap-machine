@@ -1,21 +1,30 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import MachineStage from "./Stage"
 import { Palindromes } from "./palindromes";
 
 function App() {
 
   const [textValue, setTextValue] = useState<string>("PALINDROME");
+  const [screenWidth, setScreenWidth] = useState<number>(window.innerWidth)
+
+  useEffect(() => {
+    window.addEventListener('resize', (e) => {
+      setScreenWidth(window.innerWidth)
+    })
+  }, [])
 
   return (
     <>
       <div style={{ marginTop: "2rem" }}>
         <p style={{ textAlign: "center" }}>Simple drag at either end of the bar to rotate your word. Select a preset or type in your own!</p>
+        {screenWidth < 1000 && <p>
+          Not designed for a screen this small but you do you
+        </p>}
         <div style={{
           display: "flex",
           justifyContent: "center"
         }}>
-
-          <MachineStage text={textValue} height={500} width={1000} />
+          <MachineStage text={textValue} height={500} width={Math.min(1000, screenWidth)} />
         </div>
         <div style={{ display: "flex", justifyContent: "center" }}>
 
