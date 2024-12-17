@@ -15,11 +15,14 @@ function App() {
           justifyContent: "center"
         }}>
 
-          <input value={textValue} style={{ position: "absolute", fontSize: "2rem" }}
+          <MachineStage text={textValue} height={500} width={1000} />
+        </div>
+        <div style={{ display: "flex", justifyContent: "center" }}>
+
+          <input value={textValue} style={{ fontSize: "2rem" }}
             onChange={(e) => {
               setTextValue(e.target.value.replace(/[^a-zA-Z]/g, "").toUpperCase())
             }} />
-          <MachineStage text={textValue} height={500} width={1000} />
         </div>
         <div style={{ textAlign: "center" }}>
           {Palindromes.map((v) => {
