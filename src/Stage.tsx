@@ -13,7 +13,7 @@ export default function MachineStage({ text, width, height }: { text: string, wi
 
     return (
         <Stage
-            options={{ background: "black", antialias: true }} width={width} height={height} onPointerMove={handleMouseMove} >
+            options={{ background: "black", antialias: true }} width={width} height={height} onPointerMove={handleMouseMove} onPointerDown={handleMouseMove} >
             <Emordnilap text={text} height={height} width={width} mousePosition={mousePosition} />
         </Stage>
     )
