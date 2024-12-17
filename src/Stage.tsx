@@ -98,9 +98,9 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
         g.drawRoundedRect(0, 0, rectWidth, 35, 15);
         g.endFill();
     }
-    const getLeftSide = (mousePos: Vector2): boolean => {
+    const getLeftSide = (): boolean => {
         const offset = new Vector2(width / 2, height / 2)
-        offset.subtract(mousePos)
+        offset.subtract(mousePosition)
         const point = offset.normalized()
         const angled = Vector2.RIGHT
         angled.rotateAround(Vector2.ZERO, rotation)
@@ -164,7 +164,7 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
                 onpointerenter={() => setHovering(true)}
                 onpointerleave={() => setHovering(false)}
                 onpointerdown={(e) => {
-                    setLeftSide(getLeftSide(new Vector2(e.x, e.y)))
+                    setLeftSide(getLeftSide())
                     setGrabbing(true)
                 }}
             />
