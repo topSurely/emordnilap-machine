@@ -16,7 +16,7 @@ function App() {
   return (
     <>
       <div style={{ marginTop: "2rem" }}>
-        <p style={{ textAlign: "center" }}>Simple drag at either end of the bar to rotate your word. Select a preset or type in your own!</p>
+        <p style={{ textAlign: "center" }}>Simply drag at either end of the bar to rotate your word. Select a preset or type in your own!</p>
         {screenWidth < 1000 && <p>
           Not designed for a screen this small but you do you
         </p>}
