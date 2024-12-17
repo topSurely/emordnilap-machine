@@ -26,6 +26,10 @@ function App() {
             return <button onClick={() => setTextValue(v)}>{v}</button>
           })}
         </div>
+        <div style={{ display: "flex", justifyContent: "center" }}>
+
+          <a href="https://www.youtube.com/shorts/65_8t1OEZSc">Inspiration | Go watch VSauce!</a>
+        </div>
       </div>
     </>
   )
