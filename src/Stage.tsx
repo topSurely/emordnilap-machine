@@ -34,8 +34,9 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
     const [hovering, setHovering] = useState<boolean>(false);
     const [grabbing, setGrabbing] = useState<boolean>(false);
     const [cursorState, setCursorState] = useState<CursorType>(CursorType.Free);
-    const [leftSide, setLeftSide] = useState<boolean>(false);
+    const [leftSide, setLeftSide] = useState<boolean>();
     const [reset, setReset] = useState<boolean>(false);
+    const [useMousePos, setUseMousePos] = useState<boolean>(false)
     useEffect(() => {
         if (grabbing) setCursorState(CursorType.Hold)
         else if (hovering) setCursorState(CursorType.Hover)
@@ -63,12 +64,19 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
             setReset(false)
     }, [grabbing])
     useEffect(() => {
+        if (grabbing && !useMousePos) {
+            setLeftSide(getLeftSide());
+            setUseMousePos(true)
+        }
+    }, [mousePosition])
+    useEffect(() => {
         Assets.load('./font/chewy.xml').then(() => {
             setFontLoaded(true)
             console.log("Loaded font!")
         })
         document.body.onpointerup = () => {
             setGrabbing(false);
+            setUseMousePos(false);
         }
     }, [])
     useEffect(() => {
@@ -126,7 +134,7 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
     useTick((delta) => {
         let rot = rotation;
         let vel = rotationalVelocity;
-        if (grabbing) {
+        if (grabbing && useMousePos) {
             const offset = new Vector2(width / 2, height / 2)
             offset.subtract(mousePosition)
             const point = offset.normalized()
