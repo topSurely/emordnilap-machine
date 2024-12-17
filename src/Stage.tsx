@@ -170,7 +170,7 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
                 y={height / 2}
                 onpointerenter={() => setHovering(true)}
                 onpointerleave={() => setHovering(false)}
-                onpointerdown={(e) => {
+                onpointerdown={() => {
                     setLeftSide(getLeftSide())
                     setGrabbing(true)
                 }}
