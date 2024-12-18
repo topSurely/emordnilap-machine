@@ -1,5 +1,5 @@
 import { Assets, Color, Graphics as DrawGraphics } from 'pixi.js';
-import { Stage, Container, BitmapText, Graphics, useTick } from '@pixi/react';
+import { Stage, Container, BitmapText, Graphics, useTick, Sprite } from '@pixi/react';
 import { useEffect, useState } from 'react';
 import { Vector2 } from '@catsums/vector2';
 
@@ -102,8 +102,8 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
     }
     const drawRect = (g: DrawGraphics) => {
         g.clear();
-        g.beginFill("grey")
-        g.drawRoundedRect(0, 0, rectWidth, 35, 15);
+        g.beginFill("blue")
+        g.drawRoundedRect(0, 0, rectWidth, 15, 15);
         g.endFill();
     }
     const getLeftSide = (): boolean => {
@@ -160,11 +160,53 @@ function Emordnilap({ text, width, height, mousePosition }: { text: string, widt
         setRotationalVelocity(vel)
         setRotation(rot)
     })
+    const renderGears = () => {
+        const middle = new Vector2(width / 2, height / 2);
+        const from = new Vector2((middle.x - (rectWidth / 2) + 9), middle.y);
+        const to = new Vector2((middle.x + (rectWidth / 2)), middle.y);
+        from.rotateAround(middle, rotation);
+        to.rotateAround(middle, rotation);
+
+        const tLength = (35 * 2) / rectWidth;
+        let coverage = 0
+        let index = 0
+        const leftover = ((1 / tLength) - Math.floor(1 / tLength))
+
+        const gearOffset = 1 - leftover < tLength ? 1 - leftover : 0
+
+        const elements: JSX.Element[] = [];
+        console.log(tLength, leftover)
+
+        while (coverage < 1 || index < 3) {
+            const pos = from.lerp(to, coverage + gearOffset);
+            const inverse = index % 2 === 0
+            const offset = 30 * Math.PI / 180
+            let gearRotation = (inverse ? 0 : 15 * Math.PI / 180)
+            gearRotation += inverse ? rotation * 4 : -rotation * 2
+            gearRotation += offset * index
+            elements.push(
+                <Sprite
+                    image="./gear.png"
+                    anchor={0.5}
+                    key={"gear" + index}
+                    x={pos.x}
+                    y={pos.y}
+                    rotation={gearRotation}
+                    scale={0.6}
+                    tint={inverse ? "red" : "green"}
+                />
+            )
+            coverage += tLength;
+            index++;
+        }
+        return elements
+    }
     return (
         <>
+            {text.length > 2 && renderGears()}
             <Graphics
                 draw={drawRect}
-                pivot={[rectWidth / 2, 35 / 2]}
+                pivot={[rectWidth / 2, 15 / 2]}
                 eventMode={'dynamic'} rotation={rotation}
                 x={width / 2}
                 y={height / 2}
@@ -194,7 +236,7 @@ function SingleLetter({ char, position, color }: { char: string, index: number, 
                         g.endFill();
                     }
                 } /> */}
-                <BitmapText text={char} anchor={[0.5, 0.6]} align='center' fontSize={35} style={{ fontName: 'Chewy', align: 'center', tint: color }} />
+                <BitmapText text={char} anchor={[0.5, 0.6]} align='center' fontSize={55} style={{ fontName: 'Chewy', align: 'center', tint: color }} />
             </Container>
         </>
     )
